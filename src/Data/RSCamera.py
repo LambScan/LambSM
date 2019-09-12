@@ -11,7 +11,9 @@ class RSCamera:
         self.__profile__ = None
         self.__depth_profile__ = None
         self.__depth_intrinsics__ = None
-        self.__decimate__ = rs.decimation_filter()
+        self.__decimate__ = 1
+        self.w = 0
+        self.h = 0
         self.__colorizer__ = rs.colorizer()
 
     def start(self):
@@ -24,8 +26,9 @@ class RSCamera:
             self.__depth_profile__ = rs.video_stream_profile(self.__profile__.get_stream(rs.stream.depth))
 
             self.__depth_intrinsics__ = self.__depth_profile__.get_intrinsics()
-            w, h = self.__depth_intrinsics__.width, self.__depth_intrinsics__.height
-
+            self.w = self.__depth_intrinsics__.width
+            self.h = self.__depth_intrinsics__.height
+            self.__decimate__ = rs.decimation_filter()
             self.__decimate__.set_option(rs.option.filter_magnitude, 2 ** self.__decimate__)
             return True
         except Exception as e:

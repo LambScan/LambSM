@@ -223,12 +223,17 @@ class WWatchLive(__DefaultWindow__):
                 self.window.FindElement('image_color').Update(data=imgbytes_color)
                 self.window.FindElement('image_depth').Update(data=imgbytes_depth)
             else:
+                # print("Image 2D")
                 print("ERROR")
         elif not self.image2D:
             if image_3D is not None:
+                # print("image_3D is not None")
+                # print(type(image_3D))
                 imgbytes_3D = cv2.imencode('.png', image_3D)[1].tobytes()  # ditto
                 self.window.FindElement('image_3D').Update(data=imgbytes_3D)
             else:
+                # print("Image 3D")
+                # print("Image 3D is NONE")
                 print("ERROR")
 
     # TODO: complete

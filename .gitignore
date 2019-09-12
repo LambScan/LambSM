@@ -2,3 +2,7 @@
 venv/
 
 .idea/
+
+src/Data/__pycache__/
+
+src/View/__pycache__/

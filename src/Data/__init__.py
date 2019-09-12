@@ -1,4 +1,4 @@
-from src.Data.FrameProcessor import FrameProcessor
+from src.Data.FrameProcessor_2 import FrameProcessor
 from src.Data.RSCamera import RSCamera
 
 if __name__ == '__main__':
