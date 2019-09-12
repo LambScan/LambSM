@@ -1,44 +1,11 @@
-# License: Apache 2.0. See LICENSE file in root directory.
-# Copyright(c) 2015-2017 Intel Corporation. All Rights Reserved.
-
-"""
-RoboLab's LambScan project
-
-OpenCV and Numpy Point cloud Software Renderer
-
-Usage:
-------
-Mouse:
-    Drag with left button to rotate around pivot (thick small axes),
-    with right button to translate and the wheel to zoom.
-
-Keyboard:
-    [p]     Pause
-    [r]     Reset View
-    [d]     Cycle through decimation values
-    [z]     Toggle point scaling
-    [c]     Toggle color source
-    [s]     Save PNG (./out.png)
-    [e]     Export points to rgbdij (savings/RGBDIJ/crotal/RGBDIJ_lamb_timestamp.mine)
-    [j]     Create folder with a bunch of ply exported files
-    [q/ESC] Quit
-"""
 import math
 import time
 import threading
-from queue import Queue
-
-import PySimpleGUI as sg
-import sys
 import pyrealsense2 as rs
 import numpy as np
 import cv2
 
-"""
-Demo program that displays a webcam using OpenCV
-"""
-
-shared_img = bytes(0)
+image3D = 0
 
 
 class AppState:
@@ -239,29 +206,10 @@ def pointcloud(out, verts, texcoords, color, painter=True):
     out[i[m], j[m]] = color[u[m], v[m]]
 
 
-# Stop streaming
-def stop_streaming(pipeline):
-    pipeline.stop()
-    cv2.destroyAllWindows()
-
-
 def main():
     global state, out
     state = AppState()
     lock = threading.Lock()
-
-    sg.ChangeLookAndFeel('DarkTanBlue')
-    # sg.LOOK_AND_FEEL_TABLE
-    # define the window layout
-    layout = [[sg.Text('OpenCV Demo', size=(40, 1), justification='center', font='Helvetica 20')],
-              [sg.Image(filename='', key='image')],
-              [sg.Button('Record', size=(10, 1), font='Helvetica 14'),
-               sg.Button('Stop', size=(10, 1), font='Any 14'),
-               sg.Button('Exit', size=(10, 1), font='Helvetica 14'), ]]
-
-    # create the window and show it without the plot
-    window = sg.Window('Demo Application - OpenCV Integration', layout,
-                       location=(800, 400))
 
     # ---===--- Event LOOP Read and display frames, operate the GUI --- #
     # cap = cv2.VideoCapture(0)
@@ -299,14 +247,12 @@ def main():
 
     done = False
 
-    frames_saved = 0
-
+    # def get_image():
     while True:
         # Grab camera data
         if not state.paused:
             # Wait for a coherent pair of frames: depth and color
             frames = pipeline.wait_for_frames()
-            # frames = pipeline.wait_for_frames(timeout_ms=0)
 
             depth_frame = frames.get_depth_frame()
             color_frame = frames.get_color_frame()
@@ -341,18 +287,6 @@ def main():
             verts = np.asanyarray(v).view(np.float32).reshape(-1, 3)  # xyz
             texcoords = np.asanyarray(t).view(np.float32).reshape(-1, 2)  # uv
 
-            event, values = window.Read(timeout=20)
-
-            if event == 'Exit' or event is None:
-                sys.exit(0)
-            elif event == 'Record':
-                recording = True
-            elif event == 'Stop':
-                recording = False
-                img = np.full((480, 640), 255)
-                imgbytes = cv2.imencode('.png', img)[1].tobytes()  # this is faster, shorter and needs less includes
-                window.FindElement('image').Update(data=imgbytes)
-
         # Render
         now = time.time()
 
@@ -376,70 +310,44 @@ def main():
 
         dt = time.time() - now
 
-        if recording:
-            imgbytes_color = cv2.imencode('.png', out)[1].tobytes()
-            window.FindElement('image').Update(data=imgbytes_color)
-
-            # lock.acquire()
-            shared_img = bytes(imgbytes_color)
-            print(shared_img)
-            # queue.put(shared_img)
-            # lock.release()
-
-            # print(imgbytes_color)
-            # print(type(imgbytes_color))
-            #
-            # img = bytes(imgbytes_color)
-            # print("img \n\n")
-            # print(img)
-            # # print("\n\n\n\n OUT:")
-            # # print(out)
-            p.set_img(shared_img)
-
-    stop_streaming(pipeline)
+        lock.acquire()
+        global image3D
+        print("\n\n\n")
+        print("out")
+        print("this shouldn't be 0s")
+        print("\n")
+        print(out)
+        print("\n\n\n")
+        image3D = np.copy(out)
+        # print("image3D")
+        # print(image3D)
+        # image3D = cv2.imencode('.png', out)[1].tobytes()
+        lock.release()
 
 
-def other_window():
+def get_image3D():
+    global image3D
     lock = threading.Lock()
 
+    lock.acquire()
+    if type(image3D) == int:
+        # print("image3D is 0")
+        image3D = np.empty((640, 240, 3), dtype=np.uint8)
+    lock.release()
 
-    while True:
-        time.sleep(0.1)
-        # lock.acquire()
-        # img = queue.get()
-        # print(shared_img)
-        # lock.release()
+    lock.acquire()
+    print("image3D in get_image")
+    print(image3D)
+    img = np.copy(image3D)
+    lock.release()
 
-        img = p.get_img()
-        print(img)
-
-
-class shared_ob:
-
-    def __init__(self):
-        self.image3D = np.empty((640, 240, 3), dtype=np.uint8)
-        self.producer_lock = threading.Lock()
-        self.consumer_lock = threading.Lock()
-        self.consumer_lock.acquire()
-
-    def get_img(self):
-        self.consumer_lock.acquire()
-        img = np.copy(self.image3D)
-        self.producer_lock.release()
-        return img
-
-    def set_img(self, data):
-        self.producer_lock.acquire()
-        self.image3D = np.copy(data)
-        self.consumer_lock.release()
+    return img
 
 
-if __name__ == '__main__':
-    p = shared_ob()
-    # queue = Queue(maxsize=1)
-
+def start():
     x = threading.Thread(target=main)
     x.start()
 
-    y = threading.Thread(target=other_window)
-    y.start()
+
+if __name__ == '__main__':
+    start()

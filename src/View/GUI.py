@@ -227,8 +227,11 @@ class WWatchLive(__DefaultWindow__):
                 print("ERROR")
         elif not self.image2D:
             if image_3D is not None:
-                # print("image_3D is not None")
-                # print(type(image_3D))
+                print("\n\n")
+                print("GUI: image_3D is not None")
+                print(type(image_3D))
+                print(image_3D)
+                print("\n\n")
                 imgbytes_3D = cv2.imencode('.png', image_3D)[1].tobytes()  # ditto
                 self.window.FindElement('image_3D').Update(data=imgbytes_3D)
             else:

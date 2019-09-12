@@ -1,5 +1,6 @@
-from src.Data import RSCamera
-from src.Data.Processor import Processor
+import threading
+
+from src.Data import complex_img
 from src.View.GUI import WWatchLive
 
 
@@ -29,9 +30,12 @@ def cams():
 
 
 if __name__ == '__main__':
-    camera = RSCamera()
-    camera.start()
-    get_frame = Processor(camera.__pipeline__)
+    # camera = RSCamera()
+    # camera.start()
+    # get_frame = Processor(camera.__pipeline__)
+    x = threading.Thread(target=complex_img.main)
+    x.start()
+
     window = WWatchLive()
 
     # processor.changeMode(image3D=True)
@@ -40,18 +44,28 @@ if __name__ == '__main__':
 
     while True:
         window.refresh()
-        color_frame, depth_frame = camera.get_frame()
-        result = get_frame(color_frame, depth_frame)
+        result = complex_img.get_image3D()
+        print("result")
         print(result)
-        # if type(result) is tuple and len(result) == 2 and processor.is2DMode():
-        #     color_image, depth_image = result
-        #     print("2D")
-        #     window.update_image(image_color=color_image, depth_image=depth_image)
-        # elif processor.is3DMode():
-        #     print("we're in 3D mode")
-        #     print(type(result))
-        #     print(result)
-        #     window.update_image(image_3D=result)
         window.update_image(image_3D=result)
 
-    camera.stop()
+    # window.refresh()
+    # while True:
+    #     window.refresh()
+    #     color_frame, depth_frame = camera.get_frame()
+    #     result = get_frame(color_frame, depth_frame)
+    #     print(result)
+    #     # if type(result) is tuple and len(result) == 2 and processor.is2DMode():
+    #     #     color_image, depth_image = result
+    #     #     print("2D")
+    #     #     window.update_image(image_color=color_image, depth_image=depth_image)
+    #     # elif processor.is3DMode():
+    #     #     print("we're in 3D mode")
+    #     #     print(type(result))
+    #     #     print(result)
+    #     #     window.update_image(image_3D=result)
+    #     window.update_image(image_3D=result)
+    # window.update_image(image_3D=result)
+    # while True:
+    #     pass
+    # camera.stop()
