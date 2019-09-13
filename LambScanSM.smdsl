@@ -6,7 +6,7 @@ global_machine
     transitions
     {
         starting => component, load_image, watch_live, exception_handler, the_end;
-        component => starting, exception_handler, the_end;
+        component => starting, exception_handler;
         load_image => starting, exception_handler, the_end;
         watch_live => starting, exception_handler, the_end;
         exception_handler => starting, component, load_image, watch_live;

@@ -15,7 +15,7 @@ def get_items_in_dir(my_path=""):
     return files
 
 
-def save_frames(frames_saved, id_crotal, points, mapped_frame):
+def save_point_frames(frames_saved, id_crotal, points, mapped_frame):
     ts = time.time()
     if id_crotal is not None:
         mypath = os.path.join(os.getcwd(), "savings", id_crotal)
@@ -33,6 +33,52 @@ def save_frames(frames_saved, id_crotal, points, mapped_frame):
 
             points.export_to_ply(os.path.join(mypath,
                                               "{}_pcd_lamb.ply".format(datetime.fromtimestamp(ts))), mapped_frame)
+            frames_saved += 1
+
+        elif 60 >= frames_saved > 2 and frames_saved % 2 == 0:
+            dirname = str(max(map(lambda x: int(x) if x.isdigit() else 0,
+                                  [f for f in os.listdir(mypath) if os.path.isdir(os.path.join(mypath, f))])))
+            mypath = os.path.join(mypath, dirname)
+            points.export_to_ply(os.path.join(mypath,
+                                              "{}_pcd_lamb.ply".format(datetime.fromtimestamp(ts))), mapped_frame)
+            frames_saved += 1
+        elif 0 < frames_saved <= 60:
+            frames_saved += 1
+        else:
+            frames_saved = 0
+            id_crotal = None
+    elif frames_saved > 60:
+        frames_saved = 0
+    return frames_saved, id_crotal
+
+def save_frames(id_crotal, max_frames):
+
+def save_color_depth_frame(id_crotal, color_img, depth_img):
+    ts = time.time()
+    if id_crotal is not None:
+        mypath = os.path.join(os.getcwd(), "savings", id_crotal)
+        if 2 >= frames_saved > 0 == frames_saved % 2:
+            # date_day = datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H:%M')
+            # # date_time = datetime.datetime.fromtimestamp(ts).strftime('%H:%M:%S')
+            if not os.path.exists(mypath):
+                os.makedirs(mypath)
+            dirname = str(max(map(lambda x: int(x) if x.isdigit() else 0,
+                                  [f for f in os.listdir(mypath) if os.path.isdir(os.path.join(mypath, f))]),
+                              default=0) + 1)
+            mypath = os.path.join(mypath, dirname)
+            if not os.path.exists(mypath):
+                os.makedirs(mypath)
+
+            color_path = os.path.join(mypath, 'color')
+            if not os.path.exists(color_path):
+                os.makedirs(color_path)
+
+            depth_path = os.path.join(mypath, 'color')
+            if not os.path.exists(depth_path):
+                os.makedirs(depth_path)
+
+            # points.export_to_ply(os.path.join(mypath,
+            #                                   "{}_pcd_lamb.ply".format(datetime.fromtimestamp(ts))), mapped_frame)
             frames_saved += 1
 
         elif 60 >= frames_saved > 2 and frames_saved % 2 == 0:

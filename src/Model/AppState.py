@@ -33,8 +33,8 @@ if __name__ == '__main__':
 
     window = WWatchLive()
 
-    processor.changeMode(image3D=True)
-    window.image2D = False
+    # processor.changeMode(image3D=True)
+    # window.image2D = False
 
     camera.start()
 
