@@ -203,7 +203,7 @@ class WWatchLive(__DefaultWindow__):
         self.window = None
 
     def launch(self):
-        self.window = sg.Window(self.title, self.layout, location=(800, 400))
+        self.window = sg.Window(self.title, self.layout, location=(500, 200))
         self.refresh()
         self.__click_stop__()
 
@@ -232,8 +232,9 @@ class WWatchLive(__DefaultWindow__):
                 print(type(image_3D))
                 print(image_3D)
                 print("\n\n")
-                imgbytes_3D = cv2.imencode('.png', image_3D)[1].tobytes()  # ditto
-                self.window.FindElement('image_3D').Update(data=imgbytes_3D)
+                # imgbytes_3D = cv2.imencode('.png', image_3D)[1].tobytes()  # ditto
+                # self.window.FindElement('image_3D').Update(data=imgbytes_3D)
+                self.window.FindElement('image_3D').Update(data=image_3D)
             else:
                 # print("Image 3D")
                 # print("Image 3D is NONE")

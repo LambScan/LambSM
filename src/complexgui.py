@@ -34,6 +34,8 @@ import pyrealsense2 as rs
 import numpy as np
 import cv2
 
+from src.View.GUI import WWatchLive
+
 """
 Demo program that displays a webcam using OpenCV
 """
@@ -400,18 +402,31 @@ def main():
 
 
 def other_window():
-    lock = threading.Lock()
 
+    window = WWatchLive()
+
+    # processor.changeMode(image3D=True)
+    window.image2D = False
+    window.launch()
 
     while True:
-        time.sleep(0.1)
-        # lock.acquire()
-        # img = queue.get()
-        # print(shared_img)
-        # lock.release()
-
+        window.refresh()
         img = p.get_img()
-        print(img)
+        time.sleep(0.1)
+        # print("result")
+        # print(img)
+        window.update_image(image_3D=img)
+
+
+    # while True:
+    #     time.sleep(0.1)
+    #     # lock.acquire()
+    #     # img = queue.get()
+    #     # print(shared_img)
+    #     # lock.release()
+    #
+    #     img = p.get_img()
+    #     print(img)
 
 
 class shared_ob:
@@ -436,10 +451,10 @@ class shared_ob:
 
 if __name__ == '__main__':
     p = shared_ob()
-    # queue = Queue(maxsize=1)
 
     x = threading.Thread(target=main)
     x.start()
 
     y = threading.Thread(target=other_window)
+    time.sleep(3)
     y.start()

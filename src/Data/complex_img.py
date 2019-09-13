@@ -1,11 +1,46 @@
+# License: Apache 2.0. See LICENSE file in root directory.
+# Copyright(c) 2015-2017 Intel Corporation. All Rights Reserved.
+
+"""
+RoboLab's LambScan project
+
+OpenCV and Numpy Point cloud Software Renderer
+
+Usage:
+------
+Mouse:
+    Drag with left button to rotate around pivot (thick small axes),
+    with right button to translate and the wheel to zoom.
+
+Keyboard:
+    [p]     Pause
+    [r]     Reset View
+    [d]     Cycle through decimation values
+    [z]     Toggle point scaling
+    [c]     Toggle color source
+    [s]     Save PNG (./out.png)
+    [e]     Export points to rgbdij (savings/RGBDIJ/crotal/RGBDIJ_lamb_timestamp.mine)
+    [j]     Create folder with a bunch of ply exported files
+    [q/ESC] Quit
+"""
 import math
 import time
 import threading
+from queue import Queue
+
+import PySimpleGUI as sg
+import sys
 import pyrealsense2 as rs
 import numpy as np
 import cv2
 
-image3D = 0
+from src.View.GUI import WWatchLive
+
+"""
+Demo program that displays a webcam using OpenCV
+"""
+
+shared_img = bytes(0)
 
 
 class AppState:
@@ -206,14 +241,21 @@ def pointcloud(out, verts, texcoords, color, painter=True):
     out[i[m], j[m]] = color[u[m], v[m]]
 
 
+# Stop streaming
+def stop_streaming(pipeline):
+    pipeline.stop()
+    cv2.destroyAllWindows()
+
+
 def main():
     global state, out
     state = AppState()
-    lock = threading.Lock()
+
 
     # ---===--- Event LOOP Read and display frames, operate the GUI --- #
     # cap = cv2.VideoCapture(0)
-    recording = False
+    recording = True
+    # recording = False
 
     # Configure depth and color streams
     pipeline = rs.pipeline()
@@ -247,12 +289,14 @@ def main():
 
     done = False
 
-    # def get_image():
+    frames_saved = 0
+
     while True:
         # Grab camera data
         if not state.paused:
             # Wait for a coherent pair of frames: depth and color
             frames = pipeline.wait_for_frames()
+            # frames = pipeline.wait_for_frames(timeout_ms=0)
 
             depth_frame = frames.get_depth_frame()
             color_frame = frames.get_color_frame()
@@ -287,6 +331,7 @@ def main():
             verts = np.asanyarray(v).view(np.float32).reshape(-1, 3)  # xyz
             texcoords = np.asanyarray(t).view(np.float32).reshape(-1, 2)  # uv
 
+
         # Render
         now = time.time()
 
@@ -310,44 +355,102 @@ def main():
 
         dt = time.time() - now
 
-        lock.acquire()
-        global image3D
-        print("\n\n\n")
-        print("out")
-        print("this shouldn't be 0s")
-        print("\n")
-        print(out)
-        print("\n\n\n")
-        image3D = np.copy(out)
-        # print("image3D")
-        # print(image3D)
-        # image3D = cv2.imencode('.png', out)[1].tobytes()
-        lock.release()
+        if recording:
+            imgbytes_color = cv2.imencode('.png', out)[1].tobytes()
+            # window.FindElement('image').Update(data=imgbytes_color)
+
+            # lock.acquire()
+            shared_img = bytes(imgbytes_color)
+            print(shared_img)
+            # queue.put(shared_img)
+            # lock.release()
+
+            # print(imgbytes_color)
+            # print(type(imgbytes_color))
+            #
+            # img = bytes(imgbytes_color)
+            # print("img \n\n")
+            # print(img)
+            # # print("\n\n\n\n OUT:")
+            # # print(out)
+            p.set_img(shared_img)
+
+    stop_streaming(pipeline)
 
 
-def get_image3D():
-    global image3D
-    lock = threading.Lock()
+def other_window():
 
-    lock.acquire()
-    if type(image3D) == int:
-        # print("image3D is 0")
-        image3D = np.empty((640, 240, 3), dtype=np.uint8)
-    lock.release()
+    window = WWatchLive()
 
-    lock.acquire()
-    print("image3D in get_image")
-    print(image3D)
-    img = np.copy(image3D)
-    lock.release()
+    # processor.changeMode(image3D=True)
+    window.image2D = False
+    window.launch()
 
-    return img
+    while True:
+        window.refresh()
+        img = p.get_img()
+        time.sleep(0.1)
+        # print("result")
+        # print(img)
+        window.update_image(image_3D=img)
 
 
-def start():
-    x = threading.Thread(target=main)
-    x.start()
+    # while True:
+    #     time.sleep(0.1)
+    #     # lock.acquire()
+    #     # img = queue.get()
+    #     # print(shared_img)
+    #     # lock.release()
+    #
+    #     img = p.get_img()
+    #     print(img)
+
+
+class shared_ob:
+
+    def __init__(self):
+        self.image3D = np.empty((640, 240, 3), dtype=np.uint8)
+        self.producer_lock = threading.Lock()
+        self.consumer_lock = threading.Lock()
+        self.consumer_lock.acquire()
+
+    def get_img(self):
+        self.consumer_lock.acquire()
+        img = np.copy(self.image3D)
+        self.producer_lock.release()
+        return img
+
+    def set_img(self, data):
+        self.producer_lock.acquire()
+        self.image3D = np.copy(data)
+        self.consumer_lock.release()
 
 
 if __name__ == '__main__':
-    start()
+    p = shared_ob()
+
+    # x = threading.Thread(target=main)
+    # x.start()
+
+
+    y = threading.Thread(target=other_window)
+    # time.sleep(3)
+    y.start()
+
+    main()
+
+    # window = WWatchLive()
+    #
+    # # processor.changeMode(image3D=True)
+    # window.image2D = False
+    # window.launch()
+    #
+    # while True:
+    #     window.refresh()
+    #     img_3D = p.get_img()
+    #     time.sleep(0.1)
+    #     # print("result")
+    #     # print(img)
+    #     window.update_image(image_3D=img_3D)
+
+
