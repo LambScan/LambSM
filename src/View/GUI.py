@@ -38,6 +38,7 @@ def PopupChooseFile(text_message):
 
 # class __DefaultWindow__(ABC):
 class __DefaultWindow__(object):
+    @abc.abstractmethod
     def __init__(self, title=__title__):
         sg.ChangeLookAndFeel('Reddit')
         self.layout = []
