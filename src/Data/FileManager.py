@@ -29,8 +29,7 @@ def save_frames(color_frame, depth_frame, id_crotal):
         if not os.path.exists(mypath):
             os.makedirs(mypath)
 
-        dirname = str(max(map(lambda x: int(x) if x.isdigit() else 0,
-                              [f for f in os.listdir(mypath) if os.path.isdir(os.path.join(mypath, f))]),
+        dirname = str(max([int(x) if x.isdigit() else 0 for x in [f for f in os.listdir(mypath) if os.path.isdir(os.path.join(mypath, f))]],
                           default=0) + 1)
 
         mypath = os.path.join(mypath, dirname)

@@ -19,10 +19,10 @@
 #    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from genericworker import *
+from .genericworker import *
 
 if sys.version_info[0] < 3:
-    from Model.AppState import AppState, STATE_COMPONENT, STATE_LOADER, STATE_WATCHER
+    from .Model.AppState import AppState, STATE_COMPONENT, STATE_LOADER, STATE_WATCHER
 else:
     from src.Model.AppState import AppState, STATE_COMPONENT, STATE_LOADER, STATE_WATCHER
 
@@ -43,7 +43,7 @@ class SpecificWorker(GenericWorker):
         self.global_machine.start()
 
     def __del__(self):
-        print 'SpecificWorker destructor'
+        print('SpecificWorker destructor')
 
     def setParams(self, params):
         # try:

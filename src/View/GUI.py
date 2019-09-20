@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 import time
 # import abc
-from src.Model.AppState import AppState, STATE_WATCHER, STATE_LOADER, STATE_COMPONENT
+# from src.Model.AppState import AppState, STATE_WATCHER, STATE_LOADER, STATE_COMPONENT
 
 if sys.version_info[0] < 3:
     import PySimpleGUI27 as sg
