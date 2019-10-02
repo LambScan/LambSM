@@ -24,23 +24,34 @@ def mustSave(color_image, depth_image):
 
 
 def isThereALamb(color_image, depth_image):
-    color_result = isLamb(color_image)
     depth_result = isLamb(depth_image, depth=True)
-    if not (False in color_result or False in depth_result):
-        print "There's a Lamb"
+    # DO NOT DELETE. WE WON'T USE THIS CRITERIA RIGHT NOW BUT WE WILL.
+    # color_result = isLamb(color_image)
+    # if not (False in color_result or False in depth_result):
+    #     print("There's a Lamb")
+    #     return "lamb"
+    # elif not (True in color_result or True in depth_result):
+    #     print("There's nothing")
+    #     return "no_lamb"
+    # elif not (False in depth_result):
+    #     print("Probably a lamb")
+    #     return "probably"
+    # elif not (False in color_result):
+    #     print("Check_this")
+    #     return "check"
+    # else:
+    #     print("Error")
+    #     return "error"
+    # THIS IS THE ONLY CRITERIA WE USE RIGHT NOW
+    if not (False in depth_result):
+        print("There's probably a lamb")
         return "lamb"
-    elif not (True in color_result or True in depth_result):
-        print "There's nothing"
+    elif not (True) in depth_result:
+        print("There's nothing")
         return "no_lamb"
-    elif not (False in depth_result):
-        print "Probably a lamb"
-        return "probably"
-    elif not (False in color_result):
-        print "Check_this"
-        return "check"
     else:
-        print "Error"
-        return "error"
+        print("Error")
+        print "error"
 
 
 _startx = _starty = None

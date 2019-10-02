@@ -121,7 +121,6 @@ class WImageLoaded(__DefaultWindow__):
 
     def __click_submitDepth__(self, filename):
         if "depth.png" in filename["InputDepth"]:
-            # cv2.imread(filename, cv2.IMREAD_ANYCOLOR | cv2.IMREAD_ANYDEPTH)
             im = cv2.imread(filename["InputDepth"], cv2.IMREAD_ANYCOLOR | cv2.IMREAD_ANYDEPTH)
             depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(im, alpha=0.03), cv2.COLORMAP_JET)
             imgbytes_depth = cv2.imencode(".png", depth_colormap)[1].tobytes()

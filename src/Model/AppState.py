@@ -107,20 +107,13 @@ class AppState:
         def get_frame(self, id_crotal="random"):
             camera = self.cams[0]
 
-            sleep = 0
             transition = Frame2FrameLoop
             if self.recording == 0:
-                sleep = np.random.random_integers(0, 5)
-                if sleep == 3:
-                    transition = GetFrame2SaveFrame
-                elif sleep == 4:
+                if np.random.random_integers(0, 12) == 3:
                     transition = GetFrame2TakeFrames
-                elif sleep == 2:
-                    self.recording += 1
-                    sleep = 0
 
             if not self.stopped:
-                time.sleep(sleep * 900)  # random_number * 1/4 hour
+                # time.sleep(sleep * 900)  # random_number * 1/4 hour
                 color_frame, depth_frame = camera.get_frame()
                 result = self.processor.process(color_frame, depth_frame)
                 if self.image2D and type(result) is tuple and len(result) == 2 and self.processor.image2D:
@@ -128,7 +121,14 @@ class AppState:
                     if self.recording > 0:
                         if self.recording % frequency == 1:
                             id_crotal = LambFilter.isThereALamb(color_image, depth_image)
-                            save_frames(color_image, depth_image, id_crotal)
+                            if id_crotal == "no_lamb":
+                                if 3 > np.random.random_integers(0, 15):
+                                    save_frames(color_image, depth_image, id_crotal)
+                                else:
+                                    self.recording += 1
+                            else:
+                                time.sleep(0.4)
+                                save_frames(color_image, depth_image, id_crotal)
                         self.recording -= 1
                 elif not self.processor.image2D:
                     if self.recording > 0:
