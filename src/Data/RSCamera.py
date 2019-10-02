@@ -24,7 +24,7 @@ class RSCamera:
             self.__depth_profile__ = rs.video_stream_profile(self.__profile__.get_stream(rs.stream.depth))
 
             self.__depth_intrinsics__ = self.__depth_profile__.get_intrinsics()
-            w, h = self.__depth_intrinsics__.width, self.__depth_intrinsics__.height
+            w, h = self.__depth_intrinsics__.width, self.__depth_intrinsics__.height # prueba de commit
 
             self.__decimate__.set_option(rs.option.filter_magnitude, 2 ** self.__decimate__)
             return True
