@@ -8,3 +8,5 @@ venv/
 src/savings/
 
 savings/*
+
+PY2venv/
