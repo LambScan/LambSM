@@ -1,14 +1,12 @@
 import sys
 
-from src.Data.FileManager import save_frames
-from src.Model import LambFilter
-
 if sys.version_info[0] < 3:
-    from src.Data import RSCamera, FrameProcessor, frequency
-    from src.View.GUI import *
-    from src.View.Transitions import *
+    from Model import LambFilter
+    from Data import RSCamera, FrameProcessor, FileManager
+    from View.GUI import WWatchLive, WStarting
 else:
-    from src.Data import RSCamera, FrameProcessor
+    from src.Model import LambFilter
+    from src.Data import RSCamera, FrameProcessor, FileManager
     from src.View.GUI import WWatchLive, WStarting
 
 STATE_COMPONENT = "COMPONENT"
@@ -67,14 +65,14 @@ class AppState:
                     color_image, depth_image = result
                     if self.recording > 0:
                         if self.recording % frequency == 1:
-                            save_frames(color_image, depth_image, id_crotal)
+                            FileManager.save_frames(color_image, depth_image, id_crotal)
                         self.recording -= 1
                     self.window.update_image(image_color=color_image, depth_image=depth_image)
                 elif not self.processor.image2D:
                     self.window.update_image(image_3D=result)
                     if self.recording > 0:
                         self.recording -= 1
-                        # save_frames(color_image, depth_image, "random")
+                        # FileManager.save_frames(color_image, depth_image, "random")
             else:
                 color_frame, depth_frame = camera.get_frame()
                 result = self.processor.process(color_frame, depth_frame)
@@ -109,11 +107,12 @@ class AppState:
 
             transition = Frame2FrameLoop
             if self.recording == 0:
-                if np.random.random_integers(0, 12) == 3:
+                if np.random.random_integers(0, 100) == 3:
                     transition = GetFrame2TakeFrames
 
             if not self.stopped:
                 # time.sleep(sleep * 900)  # random_number * 1/4 hour
+                time.sleep(2)
                 color_frame, depth_frame = camera.get_frame()
                 result = self.processor.process(color_frame, depth_frame)
                 if self.image2D and type(result) is tuple and len(result) == 2 and self.processor.image2D:
@@ -122,18 +121,16 @@ class AppState:
                         if self.recording % frequency == 1:
                             id_crotal = LambFilter.isThereALamb(color_image, depth_image)
                             if id_crotal == "no_lamb":
-                                if 3 > np.random.random_integers(0, 15):
-                                    save_frames(color_image, depth_image, id_crotal)
-                                else:
-                                    self.recording += 1
+                                if 2 == np.random.random_integers(0, 350):
+                                    FileManager.save_frames(color_image, depth_image, id_crotal)
                             else:
                                 time.sleep(0.4)
-                                save_frames(color_image, depth_image, id_crotal)
+                                FileManager.save_frames(color_image, depth_image, id_crotal)
                         self.recording -= 1
                 elif not self.processor.image2D:
                     if self.recording > 0:
                         self.recording -= 1
-                        # save_frames(color_image, depth_image, "random")
+                        # FileManager.save_frames(color_image, depth_image, "random")
             else:
                 color_frame, depth_frame = camera.get_frame()
                 result = self.processor.process(color_frame, depth_frame)

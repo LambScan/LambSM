@@ -51,7 +51,7 @@ def isThereALamb(color_image, depth_image):
         return "no_lamb"
     else:
         print("Error")
-        print "error"
+        return "error"
 
 
 _startx = _starty = None

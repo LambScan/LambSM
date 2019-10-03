@@ -131,7 +131,7 @@ class SpecificWorker(GenericWorker):
         try:
             transition = self.state.refresh(self.state)
             if transition is not None:
-                self.getting_framestogetting_frames.emit()
+                transition(self)
             else:
                 self.getting_framestoclosing.emit()
         except Exception as e:

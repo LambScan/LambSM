@@ -2,16 +2,15 @@ import sys
 import cv2
 import numpy as np
 import time
-# import abc
-# from src.Model.AppState import AppState
-from src.View.Transitions import *
 
 if sys.version_info[0] < 3:
     import PySimpleGUI27 as sg
-    # ABC = abc.ABCMeta
+    from Data import FileManager
+    from View import Transitions
 else:
     import PySimpleGUI as sg
-    # ABC = abc.ABC
+    from src.Data import FileManager
+    from src.View import Transitions
 
 __title__ = "LambScan"
 
@@ -55,8 +54,14 @@ class __DefaultWindow__(object):
     def __click_exit__(self):
         print("EXIT button pressed")
         self.paused = True
-        self.transition = EXIT
-        return EXIT
+        self.transition = Transitions.EXIT
+        return self.transition
+
+    def __click_back__(self):
+        print("BACK button pressed")
+        self.paused = True
+        self.transition = Transitions.BACK
+        return self.transition
 
 
 class WImageLoaded(__DefaultWindow__):
@@ -104,7 +109,7 @@ class WImageLoaded(__DefaultWindow__):
 
     def __click_submitRGB__(self, filename):
         if "color.png" in filename["InputRGB"]:
-            im = cv2.imread(filename["InputRGB"])
+            im = FileManager.load_image_color(filename["InputRGB"])
             imgbytes_color = cv2.imencode(".png", im)[1].tobytes()
             self.window.FindElement("RGB_img").Update(data=imgbytes_color)
             self.window.FindElement("RGB_error").Update("")
@@ -121,7 +126,7 @@ class WImageLoaded(__DefaultWindow__):
 
     def __click_submitDepth__(self, filename):
         if "depth.png" in filename["InputDepth"]:
-            im = cv2.imread(filename["InputDepth"], cv2.IMREAD_ANYCOLOR | cv2.IMREAD_ANYDEPTH)
+            im = FileManager.load_image_depth(filename["InputDepth"])
             depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(im, alpha=0.03), cv2.COLORMAP_JET)
             imgbytes_depth = cv2.imencode(".png", depth_colormap)[1].tobytes()
             self.window.FindElement("Depth_img").Update(data=imgbytes_depth)
@@ -221,17 +226,17 @@ class WStarting(__DefaultWindow__):
 
     def __click_watch__(self):
         print("Pushed watch button")
-        self.transition = StartingW2Watch
+        self.transition = Transitions.StartingW2Watch
         self.paused = True
 
     def __click_load__(self):
         print("Pushed load button")
-        self.transition = StartingW2Load
+        self.transition = Transitions.StartingW2Load
         self.paused = True
 
     def __click_start_component__(self):
         print("Pushed start component button")
-        self.transition = StartingW2Component
+        self.transition = Transitions.StartingW2Component
         self.paused = True
 
     def __handle_event__(self, event):
@@ -322,17 +327,17 @@ class WWatchLive(__DefaultWindow__):
 
     def __click_save_PNG__(self):
         print("save PNGs")
-        return GetFrame2SaveFrame
+        return Transitions.GetFrame2SaveFrame
 
     def __click_take_frames__(self):
-        return GetFrame2TakeFrames
+        return Transitions.GetFrame2TakeFrames
 
     def __click_save_PLY__(self):
         print("save PLY")
         print("Not implemented yet")
 
     def __click_close__(self):
-        return EXIT
+        return Transitions.EXIT
 
     def __handle_event__(self, event):
         if event == "Exit":
@@ -352,7 +357,7 @@ class WWatchLive(__DefaultWindow__):
             return self.__click_take_frames__()
         elif event == "Save_PLY":
             return self.__click_save_PLY__()
-        return Frame2FrameLoop
+        return Transitions.Frame2FrameLoop
 
 
 # TODO: 2 cams with cropped images: 4 frameWindows? or 8frameWindows
@@ -423,10 +428,10 @@ class TestingWindow(__DefaultWindow__):
 
     def __click_save_PNG__(self):
         print("save PNGs")
-        return GetFrame2SaveFrame
+        return Transitions.GetFrame2SaveFrame
 
     def __click_take_frames__(self):
-        return GetFrame2TakeFrames
+        return Transitions.GetFrame2TakeFrames
 
     def __click_save_PLY__(self):
         print("save PLY")
@@ -448,7 +453,7 @@ class TestingWindow(__DefaultWindow__):
             return self.__click_take_frames__()
         elif event == "Save_PLY":
             return self.__click_save_PLY__()
-        return Frame2FrameLoop
+        return Transitions.Frame2FrameLoop
 
 
 if __name__ == "__main__":

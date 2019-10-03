@@ -18,7 +18,6 @@ Application
         component => exception_handler;
         load_image => exception_handler;
         watch_live => exception_handler;
-        exception_handler => component, watch_live, app_init;
     };
 };
 

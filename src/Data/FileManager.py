@@ -4,10 +4,17 @@ import csv
 import time
 import cv2
 import numpy as np
+import sys
+
+if sys.version_info[0] < 3:
+    from Data import RSCamera
+else:
+    from src.Data import RSCamera
 
 
-class FileManager(Exception):
-    pass
+#
+# class FileManager(Exception):
+#     pass
 
 
 # system navigation
@@ -17,6 +24,11 @@ def get_items_in_dir(my_path=""):
     for roots, dirs, items in os.walk(my_path):
         [files.append(os.path.join(roots, item)) for item in items]
     return files
+
+
+def save_PLY(color_frame, depth_frame, filename):
+    points = RSCamera.__get_pointcloud__(color_frame, depth_frame)
+    points.export_to_ply(filename, color_frame)
 
 
 def save_frames(color_frame, depth_frame, id_crotal=None, cam="cam01"):
@@ -87,13 +99,13 @@ def save_frames(color_frame, depth_frame, id_crotal=None, cam="cam01"):
         if correct:
             cv2.imwrite(filename=filename, img=color_frame)
         else:
-            raise FileManager("filename incorrect!!")
+            raise Exception("filename incorrect!!")
         filename = filename.replace("color", "depth")
         correct, filename = is_new_file_correct(filename)
         if correct:
             cv2.imwrite(filename=filename, img=depth_frame)
         else:
-            raise FileManager("filename incorrect!!")
+            raise Exception("filename incorrect!!")
     return
 
 
@@ -244,6 +256,15 @@ def write_csv(file, data):
             print("error writing the csv file, data is empty")
     else:
         print("error writing the csv file, file path not right")
+
+
+""" Read a PNG (color) file """
+load_image_color = cv2.imread
+
+
+def load_image_depth(filename):
+    """ Read a PNG (depth) file """
+    return cv2.imread(filename["InputDepth"], cv2.IMREAD_ANYCOLOR | cv2.IMREAD_ANYDEPTH)
 
 
 def load_csv(file):

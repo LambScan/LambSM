@@ -1,9 +1,20 @@
-from src.Data import frequency, num_frames
+import sys
+
+if sys.version_info[0] < 3:
+    from Data import frequency, num_frames
+    from Model import AppState
+else:
+    from src.Model import AppState
+    from src.Data import frequency, num_frames
 
 
 def EXIT(self):
     self.state.close()
     self.apptothe_end.emit()
+
+def BACK(self):
+    self.state.close()
+    self.apptoapp.emit()
 
 
 def StartingW2Component(self):
@@ -25,7 +36,10 @@ def StartingW2Load(self):
 
 
 def Frame2FrameLoop(self):
-    self.get_framestoget_frames.emit()
+    if self.state.state == AppState.STATE_COMPONENT:
+        self.getting_framestogetting_frames.emit()
+    elif self.state.state == AppState.STATE_WATCHER:
+        self.get_framestoget_frames.emit()
 
 
 def GetFrame2SaveFrame(self):
@@ -36,23 +50,3 @@ def GetFrame2SaveFrame(self):
 def GetFrame2TakeFrames(self):
     self.state.recording = num_frames * frequency
     Frame2FrameLoop(self)
-
-
-def LoadW2LoadPLY(self):
-    pass
-
-
-def LoadPLY2Open3D(self):
-    pass
-
-
-def LoadW2LoadPNGs(self):
-    pass
-
-
-def LoadPNGs2Open3D(self):
-    pass
-
-
-def LoadPNGs2Load(self):
-    pass

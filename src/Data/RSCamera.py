@@ -60,3 +60,12 @@ class RSCamera:
 
     def deproject_pixel_to_point(self, intrinsics, x, y, d):
         return rs.rs2_deproject_pixel_to_point(intrinsics, [x, y], d)
+
+
+def __get_pointcloud__(color_frame, depth_frame):
+    pointcloud = rs.pointcloud()
+    pointcloud.map_to(color_frame)
+    points = pointcloud.calculate(depth_frame)
+    return points
+
+
