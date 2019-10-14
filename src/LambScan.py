@@ -60,9 +60,11 @@ import sys, traceback, IceStorm, time, os, copy
 # Ctrl+c handling
 import signal
 
-from PySide2 import QtCore
+from PySide2 import QtCore, QtWidgets
 
 from specificworker import *
+
+from GUI.mainwindow import MainWindow
 
 
 class CommonBehaviorI(RoboCompCommonBehavior.CommonBehavior):
@@ -93,7 +95,17 @@ def sigint_handler(*args):
 	QtCore.QCoreApplication.quit()
     
 if __name__ == '__main__':
-	app = QtCore.QCoreApplication(sys.argv)
+	#app = QtCore.QCoreApplication(sys.argv) #
+
+	# --------- GUI -------
+	app = QtWidgets.QApplication([])
+	window = MainWindow()
+	window.show()
+	for i in range(10):
+		QtCore.QCoreApplication.processEvents()
+		time.sleep(0.1)
+	# ---------------------
+
 	params = copy.deepcopy(sys.argv)
 	if len(params) > 1:
 		if not params[1].startswith('--Ice.Config='):
@@ -108,12 +120,13 @@ if __name__ == '__main__':
 		parameters[str(i)] = str(ic.getProperties().getProperty(i))
 	if status == 0:
 		worker = SpecificWorker(mprx)
-		worker.setParams(parameters)
+		worker.setParams(window) # le pasamos el objeto de la GUI
 	else:
 		print("Error getting required connections, check config file")
 		sys.exit(-1)
 
 	signal.signal(signal.SIGINT, sigint_handler)
+
 	app.exec_()
 
 	if ic:
